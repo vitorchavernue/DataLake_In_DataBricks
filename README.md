@@ -4,6 +4,36 @@ End-to-end **Data Lakehouse** built on **Databricks** with **PySpark**, **Spark 
 
 ---
 
+## 🎯 Business problem
+
+Sales, customer and product data live in **two systems (CRM and ERP)** that do not speak the same language:
+
+- the same customer has **different keys** in each system (e.g. ERP IDs with a `NAS` prefix);
+- attributes are coded differently (`M/F`, `Male/Female`, `S/M`) or missing;
+- there are **invalid dates** (zeros, wrong formats, birth dates in the future) and **inconsistent sales values** (missing or negative prices);
+- product keys mix category and product codes in a single field.
+
+As a result, the business cannot answer basic questions — *who are our customers, which products sell, how much did we sell by country* — without manual work in spreadsheets, and every report shows slightly different numbers.
+
+## 💡 Solution
+
+A **lakehouse with medallion architecture** on Databricks:
+
+| Layer | What it does | Problem solved |
+|---|---|---|
+| **Bronze** | Config-driven ingestion of every source file into Delta tables, as-is | Full history and lineage of the raw data; new sources added without new code |
+| **Silver** | One notebook per table applying explicit data quality rules (trimming, standardization, invalid date handling, price recalculation, key parsing) | Clean and consistent data, with rules documented and reproducible |
+| **Gold** | Star schema (`dim_customers`, `dim_products`, `fact_sales`) integrating CRM and ERP with surrogate keys | A single, analytics-ready sales model for Power BI and SQL |
+
+## 📈 Results
+
+- **One integrated view** of customers, products and sales across CRM and ERP
+- **Data quality rules as code** — every correction is versioned and re-applied on each run
+- **BI-ready model**: Power BI connects directly to the gold schema, with no manual preparation
+- **Orchestrated by layer** (`silver_orchestration`, `gold_orchestration`), ready to be scheduled as Databricks Jobs
+
+---
+
 ## 🏗️ Architecture
 
 ```mermaid
