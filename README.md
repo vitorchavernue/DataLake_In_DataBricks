@@ -1,2 +1,152 @@
-# DataLake In DataBricks
-This repository provides a comprehensive, real-world implementation of a Data Lakehouse built on Databricks. It includes datasets, notebooks, SQL examples, and hands-on exercises, all designed to demonstrate how modern data teams leverage Databricks in practice—from data ingestion and transformation to delivering analytics-ready data product
+# Data Lakehouse on Databricks — Medallion Architecture
+
+End-to-end **Data Lakehouse** built on **Databricks** with **PySpark**, **Spark SQL** and **Delta Lake**, following the **Medallion Architecture** (Bronze → Silver → Gold). Raw data from two source systems (CRM and ERP) is ingested, cleaned, standardized and modeled into a **star schema** ready for BI tools such as Power BI.
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart LR
+    subgraph Sources
+        CRM[CRM CSV files<br/>customers · products · sales]
+        ERP[ERP CSV files<br/>customers · locations · categories]
+    end
+    subgraph Databricks["Databricks · Unity Catalog (workspace)"]
+        V[(Volume<br/>bronze.raw_sources)]
+        B[Bronze<br/>raw Delta tables]
+        S[Silver<br/>cleaned & standardized]
+        G[Gold<br/>star schema]
+    end
+    BI[Power BI / SQL analytics]
+
+    CRM --> V
+    ERP --> V
+    V -->|config-driven ingestion| B
+    B -->|PySpark transformations| S
+    S -->|Spark SQL modeling| G
+    G --> BI
+```
+
+| Layer | Purpose | Tables |
+|---|---|---|
+| **Bronze** | Raw data, ingested as-is from CSV into Delta tables | `crm_cust_info`, `crm_prd_info`, `crm_sales_details`, `erp_cust_az12`, `erp_loc_a101`, `erp_px_cat_g1v2` |
+| **Silver** | Cleaned, typed, standardized and renamed to business-friendly names | `crm_customers`, `crm_products`, `crm_sales`, `erp_customers`, `erp_customer_location`, `erp_product_category` |
+| **Gold** | Dimensional model (star schema) for analytics | `dim_customers`, `dim_products`, `fact_sales` |
+
+---
+
+## 🔄 Pipeline
+
+### 1. Setup — `script/init_lakehouse.ipynb`
+Creates the `bronze`, `silver` and `gold` schemas in Unity Catalog and the `bronze.raw_sources` volume that stores the raw CSV files.
+
+### 2. Bronze — `script/bronze/`
+- `bronze_layer_(improved).ipynb`: **config-driven ingestion** — a single list (`INGESTION_CONFIG`) maps each source file to its target table, so adding a new source requires no new code.
+- `bronze_layer(basic).ipynb`: first, step-by-step version kept for comparison.
+
+### 3. Silver — `script/silver/`
+One notebook per table, all following the same structure (read → transform → validate → write). Main data quality rules:
+
+| Rule | Example |
+|---|---|
+| Trim all string columns | applied to every table |
+| Standardize codes into readable values | `S/M` → `Single/Married`, `F/M` → `Female/Male`, product line `M/R/S/T` → `Mountain/Road/Other Sales/Touring` |
+| Remove invalid records | customers without ID are dropped |
+| Fix invalid dates | dates equal to `0` or not in `yyyyMMdd` format become `NULL`; birth dates in the future are removed |
+| Recalculate inconsistent values | missing or negative prices are derived from `sales / quantity` |
+| Handle nulls | missing product cost → `0` |
+| Parse keys | product key split into `category_id` and `product_number`; `NAS` prefix removed from ERP customer IDs |
+| Business-friendly naming | `cst_firstname` → `first_name`, `sls_ord_num` → `order_number`, etc. |
+
+`silver_orchestration.ipynb` runs all Silver notebooks in sequence as a single entry point for **Databricks Jobs**.
+
+### 4. Gold — `script/gold/`
+- `dim_customers`: integrates CRM and ERP customer data (country, birth date and gender, with CRM as master source and ERP as fallback) with a **surrogate key**.
+- `dim_products`: products enriched with category, subcategory and maintenance flag, with a surrogate key.
+- `fact_sales`: sales transactions linked to the dimensions through the surrogate keys.
+
+`gold_orchestration.ipynb` runs all Gold notebooks in sequence.
+
+---
+
+## 🧩 Data Model (Gold)
+
+```mermaid
+erDiagram
+    dim_customers ||--o{ fact_sales : customer_key
+    dim_products  ||--o{ fact_sales : product_key
+    dim_customers {
+        int customer_key PK
+        int customer_id
+        string customer_number
+        string first_name
+        string last_name
+        string country
+        string marital_status
+        string gender
+        date birthdate
+    }
+    dim_products {
+        int product_key PK
+        int product_id
+        string product_number
+        string product_name
+        string category
+        string subcategory
+        string product_line
+        double product_cost
+    }
+    fact_sales {
+        string order_number
+        int product_key FK
+        int customer_key FK
+        date order_date
+        date ship_date
+        date due_date
+        double sales_amount
+        int quantity
+        double price
+    }
+```
+
+---
+
+## ▶️ How to Run
+
+1. Create a workspace on Databricks Free Edition (or any Databricks workspace with Unity Catalog).
+2. Import the `script/` folder into your workspace.
+3. Run `init_lakehouse.ipynb` to create the schemas and the volume.
+4. Upload the files from `datasets/engineering/` to `/Volumes/workspace/bronze/raw_sources/`, keeping the `source_crm` and `source_erp` folders.
+5. Run, in order: `bronze_layer_(improved)` → `silver_orchestration` → `gold_orchestration`.
+6. Connect Power BI (or the Databricks SQL editor) to the `gold` schema.
+
+---
+
+## 📁 Repository Structure
+
+```
+├── datasets/
+│   ├── engineering/        # raw CRM and ERP source files (pipeline input)
+│   └── analysts/           # ready-to-use datasets for analysis exercises (sales star schema, HR)
+└── script/
+    ├── init_lakehouse.ipynb
+    ├── bronze/
+    ├── silver/
+    │   ├── crm/
+    │   └── erp/
+    └── gold/
+```
+
+---
+
+## 🛠️ Tech Stack
+
+**Databricks** · **Unity Catalog** · **Delta Lake** · **PySpark** · **Spark SQL** · **Databricks Jobs**
+
+---
+
+## 👤 Author
+
+**Vitor Chavernue** — Senior Data Engineer & Data Analyst
+[LinkedIn](https://www.linkedin.com/in/vitorchavernue/) · [GitHub](https://github.com/vitorchavernue)
