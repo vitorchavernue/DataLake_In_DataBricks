@@ -4,7 +4,7 @@ Diagram as code: the layers, steps and numbers of this project are written in th
 drawing engine renders them to SVG (sharp, editable in any design tool) and to PNG with Playwright (what
 GitHub shows). Change the specification and run the script again to update the images.
 
-    python scripts/build_architecture.py      # writes docs/images/architecture.(svg|png) and delivery_steps.(svg|png)
+    python scripts/build_architecture.py      # writes the README diagrams to docs/images/ (SVG and PNG)
 """
 
 from __future__ import annotations
@@ -121,6 +121,71 @@ STEPS = [
     ("play", "Serve", "Power BI and SQL analytics on the gold schema.", "gold schema"),
 ]
 PHASES = [("PLAN", 0, 1), ("BUILD", 2, 4), ("RUN", 5, 6)]
+# Gold data model (docs/images/data_model.png): workspace.gold in Unity Catalog
+DATA_MODEL = {
+    "title": "Gold star schema for sales analysis",
+    "subtitle": "workspace.gold · Delta tables in Unity Catalog",
+    "fact": {
+        "name": "fact_sales",
+        "grain": "One row per order line · 60,398 rows",
+        "built": "script/gold/gold_fact_sales.ipynb",
+        "sections": [
+            ("KEYS", [("order_number", "", ""), ("product_key", "", "FK"), ("customer_key", "", "FK")]),
+            ("DATES", [("order_date", "date", ""), ("ship_date", "date", ""), ("due_date", "date", "")]),
+            ("MEASURES", [("sales_amount", "", ""), ("quantity", "", ""), ("price", "", "")]),
+        ],
+    },
+    "dims": [
+        {
+            "name": "dim_customers",
+            "side": "left",
+            "key": "customer_key",
+            "fk": "customer_key",
+            "rows": [
+                ("customer_key", "surrogate", "PK"),
+                ("customer_id · customer_number", "", ""),
+                ("first_name · last_name", "", ""),
+                ("country", "ERP location", ""),
+                ("marital_status", "", ""),
+                ("gender", "CRM, ERP fallback", ""),
+                ("birthdate", "ERP", ""),
+                ("create_date", "", ""),
+            ],
+            "values": "CRM customers enriched with ERP data · 18,484 customers",
+        },
+        {
+            "name": "dim_products",
+            "side": "right",
+            "key": "product_key",
+            "fk": "product_key",
+            "rows": [
+                ("product_key", "surrogate", "PK"),
+                ("product_id · product_number", "", ""),
+                ("product_name", "", ""),
+                ("category_id", "", ""),
+                ("category · subcategory", "ERP", ""),
+                ("maintenance_flag", "ERP", ""),
+                ("product_line", "", ""),
+                ("start_date", "", ""),
+            ],
+            "values": "CRM products enriched with the ERP category table",
+        },
+    ],
+    "notes": [
+        (
+            "Surrogate keys",
+            "ROW_NUMBER keys decouple the reports from the CRM and ERP codes; the fact looks them up by product number and customer id.",
+        ),
+        (
+            "CRM is the master",
+            "Gender comes from the CRM and falls back to the ERP only when the CRM has 'n/a'; country and birth date come from the ERP.",
+        ),
+        (
+            "Clean before gold",
+            "Silver already trimmed, standardized and fixed dates and prices, so gold only joins and names the business view.",
+        ),
+    ],
+}
 
 
 # ==========================================================================================================
@@ -217,7 +282,9 @@ def wrap(value: str, width_px: float, size: float, factor: float = 0.53) -> list
 
 def paragraph(x, y, value, width, size=16, color=MUTED, leading=1.42, family=FONT, weight=400):
     lines = wrap(value, width, size, 0.6 if family == MONO else 0.53)
-    out = "".join(txt(x, y + i * size * leading, line, size, color, weight, family=family) for i, line in enumerate(lines))
+    out = "".join(
+        txt(x, y + i * size * leading, line, size, color, weight, family=family) for i, line in enumerate(lines)
+    )
     return out, y + len(lines) * size * leading
 
 
@@ -226,7 +293,8 @@ def chip(x, y, label, color, size=14, pad=12, family=FONT, fill=None):
     h = size + 14
     return (
         f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h}" rx="{h / 2}" fill="{fill or CARD_2}" '
-        f'stroke="{color}" stroke-opacity="0.6" stroke-width="1.2"/>' + txt(x + pad, y + size + 3.5, label, size, color, 600, family=family)
+        f'stroke="{color}" stroke-opacity="0.6" stroke-width="1.2"/>'
+        + txt(x + pad, y + size + 3.5, label, size, color, 600, family=family)
     ), w
 
 
@@ -239,6 +307,9 @@ def defs():
   <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="#fff" fill-opacity="0.04"/></pattern>
   <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
     <path d="M0 0 L10 5 L0 10 z" fill="{ACCENT_LIGHT}"/></marker>
+  <marker id="arrow-normal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="{ACCENT_LIGHT}"/></marker>
+  <marker id="arrow-good" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="{GOOD}"/></marker>
+  <marker id="arrow-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="{BAD}"/></marker>
 </defs>"""
 
 
@@ -280,7 +351,9 @@ def orchestration_band(width, y):
         c, w = chip(x, y + 30, s, ACCENT_LIGHT, size=15)
         parts.append(c)
         if i < len(o["steps"]) - 1:
-            parts.append(f'<path d="M{x + w + 6:.1f} {y + 44.5} h14" stroke="{ACCENT_LIGHT}" stroke-width="2" marker-end="url(#arrow)"/>')
+            parts.append(
+                f'<path d="M{x + w + 6:.1f} {y + 44.5} h14" stroke="{ACCENT_LIGHT}" stroke-width="2" marker-end="url(#arrow)"/>'
+            )
         x += w + 28
     for label, kind in o.get("status", []):
         c, w = chip(x, y + 30, label, {"good": GOOD, "warn": WARN, "bad": BAD}[kind], size=14)
@@ -292,7 +365,9 @@ def orchestration_band(width, y):
 def layer_body(layer, x, top, card_w):
     """Draws the content of one layer card; returns the SVG parts and the y where the content ends."""
     parts, inner = [], card_w - 52
-    parts.append(f'<circle cx="{x + 52:.1f}" cy="{top + 56}" r="28" fill="{CARD_2}" stroke="{ACCENT_DARK}" stroke-width="1.5"/>')
+    parts.append(
+        f'<circle cx="{x + 52:.1f}" cy="{top + 56}" r="28" fill="{CARD_2}" stroke="{ACCENT_DARK}" stroke-width="1.5"/>'
+    )
     parts.append(icon(layer["icon"], x + 35, top + 39, 34, ACCENT_LIGHT))
     parts.append(txt(x + card_w - 26, top + 48, layer["n"], 30, LINE, 800, "end"))
     block, y = paragraph(x + 26, top + 118, layer["name"], inner, 24, INK, 1.15, weight=800)
@@ -326,7 +401,9 @@ def layer_body(layer, x, top, card_w):
                 w = len(d) * 13 * 0.6 + 20
                 if cx + w > x + card_w - 20:
                     cx, cy = x + 26, cy + 36
-                parts.append(f'<rect x="{cx:.1f}" y="{cy:.1f}" width="{w:.1f}" height="28" rx="14" fill="{CARD_2}" stroke="{THIRD}" stroke-opacity="0.55"/>')
+                parts.append(
+                    f'<rect x="{cx:.1f}" y="{cy:.1f}" width="{w:.1f}" height="28" rx="14" fill="{CARD_2}" stroke="{THIRD}" stroke-opacity="0.55"/>'
+                )
                 parts.append(txt(cx + 10, cy + 19, d, 13, THIRD, 600))
                 cx += w + 8
             y = cy + 62
@@ -335,7 +412,9 @@ def layer_body(layer, x, top, card_w):
             parts.append(txt(x + 26, y, title, 12, DIM, 700, spacing=2))
             y += 14
             for name, sub in items:
-                parts.append(f'<rect x="{x + 26:.1f}" y="{y:.1f}" width="{inner:.1f}" height="46" rx="10" fill="{CARD_2}" stroke="{SECOND}" stroke-opacity="0.5"/>')
+                parts.append(
+                    f'<rect x="{x + 26:.1f}" y="{y:.1f}" width="{inner:.1f}" height="46" rx="10" fill="{CARD_2}" stroke="{SECOND}" stroke-opacity="0.5"/>'
+                )
                 parts.append(txt(x + 40, y + 20, name, 14, INK, 600))
                 parts.append(txt(x + 40, y + 38, sub, 12, SECOND, 500))
                 y += 54
@@ -369,7 +448,9 @@ def architecture():
     for i, layer in enumerate(LAYERS):
         x = 60 + i * (card_w + gap)
         parts.append(f'<g id="Layer {i + 1} {esc(layer["name"])}">')
-        parts.append(f'<rect x="{x:.1f}" y="{top}" width="{card_w:.1f}" height="{card_h:.1f}" rx="22" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>')
+        parts.append(
+            f'<rect x="{x:.1f}" y="{top}" width="{card_w:.1f}" height="{card_h:.1f}" rx="22" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+        )
         parts.append(f'<rect x="{x + 26:.1f}" y="{top}" width="70" height="3.5" rx="1.75" fill="url(#accent)"/>')
         body, _ = layer_body(layer, x, top, card_w)
         parts += body
@@ -389,7 +470,9 @@ def architecture():
     half = (width - 120 - 24) / 2
     rows_h = 80 + len(CODE) * 70 + 20
     box_h = max(rows_h, 300)
-    parts.append(f'<rect x="60" y="{by:.1f}" width="{half:.1f}" height="{box_h}" rx="22" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>')
+    parts.append(
+        f'<rect x="60" y="{by:.1f}" width="{half:.1f}" height="{box_h}" rx="22" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+    )
     parts.append(icon("code", 88, by + 26, 30, ACCENT_LIGHT))
     parts.append(txt(130, by + 50, "Where the code is", 22, INK, 800))
     y = by + 80
@@ -403,14 +486,18 @@ def architecture():
         y += 70
 
     rx = 60 + half + 24
-    parts.append(f'<rect x="{rx:.1f}" y="{by:.1f}" width="{half:.1f}" height="{box_h}" rx="22" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>')
+    parts.append(
+        f'<rect x="{rx:.1f}" y="{by:.1f}" width="{half:.1f}" height="{box_h}" rx="22" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+    )
     parts.append(icon("gauge", rx + 28, by + 26, 30, SECOND))
     parts.append(txt(rx + 70, by + 50, PROOFS_TITLE, 22, INK, 800))
     k_n = len(PROOFS)
     kw = (half - 56 - 12 * (k_n - 1)) / k_n
     for k, (big, small) in enumerate(PROOFS):
         kx = rx + 28 + k * (kw + 12)
-        parts.append(f'<rect x="{kx:.1f}" y="{by + 82:.1f}" width="{kw:.1f}" height="{box_h - 108}" rx="14" fill="{CARD_2}"/>')
+        parts.append(
+            f'<rect x="{kx:.1f}" y="{by + 82:.1f}" width="{kw:.1f}" height="{box_h - 108}" rx="14" fill="{CARD_2}"/>'
+        )
         parts.append(f'<rect x="{kx + 18:.1f}" y="{by + 82:.1f}" width="44" height="3" rx="1.5" fill="{SECOND}"/>')
         size = 40 if len(big) <= 6 else 30
         parts.append(txt(kx + 18, by + 146, big, size, SECOND, 800))
@@ -430,6 +517,7 @@ def delivery():
     gap = 22
     w = (width - 120 - gap * (n - 1)) / n
     top = 300
+
     # Measure title + description of every step so all cards have the same height
     def title_size(title):
         return 22 if len(wrap(title, w - 44, 22)) == 1 else 20
@@ -440,31 +528,559 @@ def delivery():
         return end
 
     card_h = max(text_end(title, what) for _, title, what, _ in STEPS) + 90
-    parts.append(f'<rect x="{60 + w / 2:.1f}" y="{top - 46}" width="{width - 120 - w:.1f}" height="3" rx="1.5" fill="url(#accent)"/>')
+    parts.append(
+        f'<rect x="{60 + w / 2:.1f}" y="{top - 46}" width="{width - 120 - w:.1f}" height="3" rx="1.5" fill="url(#accent)"/>'
+    )
     for label, a, b in PHASES:
         xa = 60 + a * (w + gap)
         xb = 60 + b * (w + gap) + w
-        parts.append(f'<rect x="{xa:.1f}" y="{top - 112}" width="{xb - xa:.1f}" height="34" rx="17" fill="{CARD}" stroke="{LINE}"/>')
+        parts.append(
+            f'<rect x="{xa:.1f}" y="{top - 112}" width="{xb - xa:.1f}" height="34" rx="17" fill="{CARD}" stroke="{LINE}"/>'
+        )
         parts.append(txt((xa + xb) / 2, top - 89, label, 14, ACCENT_LIGHT, 700, "middle", spacing=4))
     for i, (ic, title, what, files) in enumerate(STEPS):
         x = 60 + i * (w + gap)
         cx = x + w / 2
-        parts.append(f'<circle cx="{cx:.1f}" cy="{top - 44.5}" r="17" fill="{BG_1}" stroke="{ACCENT_LIGHT}" stroke-width="2.5"/>')
+        parts.append(
+            f'<circle cx="{cx:.1f}" cy="{top - 44.5}" r="17" fill="{BG_1}" stroke="{ACCENT_LIGHT}" stroke-width="2.5"/>'
+        )
         parts.append(txt(cx, top - 38, str(i + 1), 16, INK, 800, "middle"))
-        parts.append(f'<rect x="{x:.1f}" y="{top}" width="{w:.1f}" height="{card_h:.1f}" rx="20" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>')
+        parts.append(
+            f'<rect x="{x:.1f}" y="{top}" width="{w:.1f}" height="{card_h:.1f}" rx="20" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+        )
         parts.append(f'<rect x="{x + 22:.1f}" y="{top}" width="56" height="3" rx="1.5" fill="url(#accent)"/>')
-        parts.append(f'<circle cx="{x + 50:.1f}" cy="{top + 58}" r="28" fill="{CARD_2}" stroke="{ACCENT_DARK}" stroke-width="1.5"/>')
+        parts.append(
+            f'<circle cx="{x + 50:.1f}" cy="{top + 58}" r="28" fill="{CARD_2}" stroke="{ACCENT_DARK}" stroke-width="1.5"/>'
+        )
         parts.append(icon(ic, x + 33, top + 41, 34, ACCENT_LIGHT))
         block, end = paragraph(x + 22, top + 128, title, w - 44, title_size(title), INK, 1.15, weight=800)
         parts.append(block)
         block, _ = paragraph(x + 22, end + 14, what, w - 44, 15.5, MUTED, 1.5)
         parts.append(block)
-        parts.append(f'<rect x="{x + 16:.1f}" y="{top + card_h - 68:.1f}" width="{w - 32:.1f}" height="48" rx="12" fill="{CARD_2}"/>')
+        parts.append(
+            f'<rect x="{x + 16:.1f}" y="{top + card_h - 68:.1f}" width="{w - 32:.1f}" height="48" rx="12" fill="{CARD_2}"/>'
+        )
         parts.append(txt(x + 30, top + card_h - 49, "DELIVERABLE", 11, DIM, 700, spacing=2))
         size = min(12.5, (w - 60) / max(len(files), 1) / 0.6)
         parts.append(txt(x + 30, top + card_h - 30, files, size, SECOND, 600, family=MONO))
     height = int(top + card_h + 40)
-    svg = canvas(width, height, "\n".join(parts), "HOW IT WAS BUILT", HEADER["steps_title"], "plan → build → prove → run")
+    svg = canvas(
+        width, height, "\n".join(parts), "HOW IT WAS BUILT", HEADER["steps_title"], "plan → build → prove → run"
+    )
+    return svg, width, height
+
+
+# ------------------------------------------------------------------ 3. data model (star schema)
+def entity(x, y, w, ent, kind):
+    """Draws a table card (fact or dimension) with its columns; returns the parts, the height and the y of each column."""
+    color = SECOND if kind == "FACT" else THIRD
+    parts, rows_y = [], {}
+    head = [
+        f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="HEIGHT" rx="18" fill="{CARD}" stroke="{color}" '
+        f'stroke-opacity="{0.75 if kind == "FACT" else 0.45}" stroke-width="{2 if kind == "FACT" else 1.5}"/>'
+    ]
+    parts.append(f'<rect x="{x + 22:.1f}" y="{y:.1f}" width="60" height="3.5" rx="1.75" fill="{color}"/>')
+    badge, bw = chip(x + 20, y + 20, kind, color, size=11, pad=9)
+    parts.append(badge)
+    size = 20 if kind == "FACT" else 16.5
+    size = min(size, (w - 40 - bw - 10) / max(len(ent["name"]), 1) / 0.6)
+    parts.append(txt(x + 20 + bw + 10, y + 37, ent["name"], size, INK, 800, family=MONO))
+    cy = y + 62
+    if ent.get("grain"):
+        block, cy = paragraph(x + 20, cy + 12, ent["grain"], w - 40, 14, MUTED, 1.35)
+        parts.append(block)
+        cy -= 6
+    if ent.get("built"):
+        block, cy = paragraph(x + 20, cy + 14, ent["built"], w - 40, 12, DIM, 1.35, family=MONO)
+        parts.append(block)
+        cy -= 6
+    cy += 12 if (ent.get("grain") or ent.get("built")) else -2
+    for title, rows in ent["sections"]:
+        if title:
+            parts.append(txt(x + 20, cy + 12, title, 11, DIM, 700, spacing=2))
+            cy += 22
+        for name, typ, tag in rows:
+            tag_color = {"PK": SECOND, "FK": THIRD}.get(tag, MUTED)
+            fill = CARD_2 if tag != "more" else "none"
+            parts.append(
+                f'<rect x="{x + 14:.1f}" y="{cy:.1f}" width="{w - 28:.1f}" height="28" rx="8" fill="{fill}"'
+                + (f' stroke="{tag_color}" stroke-opacity="0.35"' if tag in ("PK", "FK") else "")
+                + "/>"
+            )
+            if tag == "more":
+                parts.append(txt(x + 26, cy + 19, name, 13, DIM, 500, family=FONT))
+            else:
+                name_size = min(13.5, (w - 120) / max(len(name), 1) / 0.6)
+                parts.append(
+                    txt(x + 26, cy + 19, name, name_size, INK if tag else MUTED, 600 if tag else 500, family=MONO)
+                )
+                right = x + w - 26
+                if tag in ("PK", "FK"):
+                    t, tw = chip(right - (len(tag) * 10 * 0.56 + 14), cy + 4.5, tag, tag_color, size=10, pad=7)
+                    parts.append(t)
+                    right -= tw + 8
+                if typ:
+                    parts.append(txt(right, cy + 19, typ, 11.5, DIM, 500, "end", family=MONO))
+            rows_y[name] = cy + 14
+            cy += 32
+        cy += 6
+    if ent.get("values"):
+        block, cy = paragraph(x + 20, cy + 12, ent["values"], w - 40, 12.5, DIM, 1.4)
+        parts.append(block)
+        cy -= 4
+    height = cy - y + 10
+    head[0] = head[0].replace("HEIGHT", f"{height:.1f}")
+    return head + parts, height, rows_y
+
+
+def link(x1, y1, x2, y2, xm, color):
+    """Orthogonal connector with rounded corners: horizontal, vertical at xm, horizontal."""
+    if abs(y1 - y2) < 1.5:
+        return f'<path d="M{x1:.1f} {y1:.1f} H{x2:.1f}" fill="none" stroke="{color}" stroke-width="2"/>'
+    r = min(12, abs(y2 - y1) / 2, abs(xm - x1), abs(x2 - xm))
+    sx = 1 if xm > x1 else -1
+    sy = 1 if y2 > y1 else -1
+    ex = 1 if x2 > xm else -1
+    return (
+        f'<path d="M{x1:.1f} {y1:.1f} H{xm - sx * r:.1f} Q{xm:.1f} {y1:.1f} {xm:.1f} {y1 + sy * r:.1f} '
+        f'V{y2 - sy * r:.1f} Q{xm:.1f} {y2:.1f} {xm + ex * r:.1f} {y2:.1f} H{x2:.1f}" fill="none" stroke="{color}" stroke-width="2"/>'
+    )
+
+
+def ends(x_one, y_one, x_many, y_many, color):
+    """Cardinality marks: a bar on the 'one' side (dimension key), a crow's foot on the 'many' side (foreign key)."""
+    d = 1 if x_many > x_one else -1
+    return (
+        f'<circle cx="{x_one:.1f}" cy="{y_one:.1f}" r="3.5" fill="{color}"/>'
+        f'<path d="M{x_one + d * 10:.1f} {y_one - 7:.1f} V{y_one + 7:.1f}" stroke="{color}" stroke-width="2.2"/>'
+        f'<path d="M{x_many - d * 14:.1f} {y_many:.1f} L{x_many:.1f} {y_many - 7:.1f} M{x_many - d * 14:.1f} {y_many:.1f} '
+        f'L{x_many:.1f} {y_many + 7:.1f}" fill="none" stroke="{color}" stroke-width="2"/>'
+    )
+
+
+def place(column, top, height, gap):
+    """Spreads the cards of one column over the available height (centred when there is one card)."""
+    total = sum(h for _, h in column)
+    if len(column) == 1:
+        return [top + (height - total) / 2]
+    space = max(gap, (height - total) / (len(column) - 1))
+    ys, y = [], top
+    for _, h in column:
+        ys.append(y)
+        y += h + space
+    return ys
+
+
+def route(starts, x_from, x_to):
+    """x of the vertical segment of each connector, chosen so the connectors of one side never cross."""
+    step = 14 if x_to > x_from else -14
+    down = sorted([i for i, (a, b) in enumerate(starts) if a < b], key=lambda i: starts[i][0])
+    up = sorted([i for i, (a, b) in enumerate(starts) if a >= b], key=lambda i: -starts[i][0])
+    xs = {}
+    for group in (down, up):
+        for rank, i in enumerate(group):
+            xs[i] = x_to - (26 + rank * abs(step)) * (1 if step > 0 else -1)
+    return xs
+
+
+def star():
+    m = globals()["DATA_MODEL"]
+    width = 1920
+    snow = any(d.get("parent") for d in m["dims"])
+    if snow:
+        widths = {"outer": 290, "left": 380, "fact": 500, "right": 400}
+    else:
+        widths = {"left": 450, "fact": 560, "right": 450}
+    gap = (width - 120 - sum(widths.values())) / (len(widths) - 1)
+    xs, x = {}, 60
+    for col, w in widths.items():
+        xs[col] = x
+        x += w + gap
+    top = 200
+    parts = []
+    fact_parts, fact_h, fact_rows = entity(0, 0, widths["fact"], m["fact"], "FACT")
+    dims = {}
+    for d in m["dims"]:
+        col = "outer" if d.get("parent") else d["side"]
+        ent = {"name": d["name"], "sections": [("", d["rows"])], "values": d.get("values")}
+        _, h, _ = entity(0, 0, widths[col], ent, "DIM")
+        dims[d["name"]] = {"spec": d, "col": col, "ent": ent, "h": h}
+
+    # Same order in each column as the key rows in the card it links to, so connectors never cross
+    def order(d):
+        target = fact_rows if not d["spec"].get("parent") else None
+        return (target or {}).get(d["spec"]["fk"], 0)
+
+    cols = {c: [d for d in dims.values() if d["col"] == c] for c in widths if c != "fact"}
+    for c in ("left", "right"):
+        cols[c].sort(key=order)
+    body_h = max([fact_h] + [sum(d["h"] for d in v) + 28 * (len(v) - 1) for v in cols.values() if v])
+    fact_y = top + (body_h - fact_h) / 2
+    fact_parts, _, fact_rows = entity(xs["fact"], fact_y, widths["fact"], m["fact"], "FACT")
+    for c in ("left", "right"):
+        if not cols[c]:
+            continue
+        for d, y in zip(cols[c], place([(d, d["h"]) for d in cols[c]], top, body_h, 28), strict=True):
+            d["parts"], _, d["rows"] = entity(xs[c], y, widths[c], d["ent"], "DIM")
+            d["y"] = y
+    if snow:  # outer dimensions sit next to the dimension they describe
+        parent = dims[cols["outer"][0]["spec"]["parent"]]
+        span = sum(d["h"] for d in cols["outer"]) + 28 * (len(cols["outer"]) - 1)
+        cols["outer"].sort(key=lambda d: parent["rows"].get(d["spec"]["fk"], 0))
+        start = max(top, parent["y"] + parent["h"] / 2 - span / 2)
+        for d in cols["outer"]:
+            d["parts"], _, d["rows"] = entity(xs["outer"], start, widths["outer"], d["ent"], "DIM")
+            d["y"] = start
+            start += d["h"] + 28
+    # Connectors: from the key of each dimension to the matching foreign key row
+    lines = []
+    for c in ("left", "right") + (("outer",) if snow else ()):
+        group = cols[c]
+        if not group:
+            continue
+        if c == "outer":
+            target_rows, tx = parent["rows"], xs["left"]
+            sx = xs["outer"] + widths["outer"]
+        elif c == "left":
+            target_rows, tx, sx = fact_rows, xs["fact"], xs["left"] + widths["left"]
+        else:
+            target_rows, tx, sx = fact_rows, xs["fact"] + widths["fact"], xs["right"]
+        pairs = [(d["rows"][d["spec"]["key"]], target_rows[d["spec"]["fk"]]) for d in group]
+        mids = route(pairs, sx, tx)
+        for i, (y1, y2) in enumerate(pairs):
+            lines.append(link(sx, y1, tx, y2, mids[i], THIRD))
+            lines.append(ends(sx, y1, tx, y2, THIRD))
+    parts.append('<g id="Relationships" opacity="0.9">' + "".join(lines) + "</g>")
+    parts.append('<g id="Fact">' + "".join(fact_parts) + "</g>")
+    for d in dims.values():
+        parts.append(f'<g id="{esc(d["spec"]["name"])}">' + "".join(d["parts"]) + "</g>")
+
+    # Bottom: other tables and design notes
+    y = top + body_h + 40
+    for title, items in m.get("extras", []):
+        parts.append(
+            f'<rect x="60" y="{y:.1f}" width="{width - 120}" height="EXTRA_H" rx="20" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+        )
+        idx = len(parts) - 1
+        parts.append(txt(88, y + 40, title, 13, DIM, 700, spacing=2))
+        cx, cy = 88, y + 60
+        for it in items:
+            c, w = chip(cx, cy, it, SECOND, size=13.5, family=MONO)
+            if cx + w > width - 88:
+                cx, cy = 88, cy + 42
+                c, w = chip(cx, cy, it, SECOND, size=13.5, family=MONO)
+            parts.append(c)
+            cx += w + 10
+        h = cy - y + 56
+        parts[idx] = parts[idx].replace("EXTRA_H", f"{h:.1f}")
+        y += h + 24
+    if m.get("notes"):
+        n = len(m["notes"])
+        nw = (width - 120 - 20 * (n - 1)) / n
+        nh = max(paragraph(0, y + 74, text, nw - 56, 14.5, MUTED)[1] for _, text in m["notes"]) - y + 10
+        for k, (head, text) in enumerate(m["notes"]):
+            nx = 60 + k * (nw + 20)
+            parts.append(
+                f'<rect x="{nx:.1f}" y="{y:.1f}" width="{nw:.1f}" height="{nh:.1f}" rx="18" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+            )
+            parts.append(f'<rect x="{nx + 24:.1f}" y="{y:.1f}" width="44" height="3" rx="1.5" fill="url(#accent)"/>')
+            block, _ = paragraph(nx + 28, y + 42, head, nw - 56, 17, INK, 1.2, weight=700)
+            parts.append(block)
+            block, _ = paragraph(nx + 28, y + 74, text, nw - 56, 14.5, MUTED)
+            parts.append(block)
+        y += nh + 24
+    # Legend
+    lx = 60
+    parts.append(txt(lx, y + 22, "LEGEND", 12, DIM, 700, spacing=2))
+    lx += 90
+    for label, color in (("PK  primary key", SECOND), ("FK  foreign key", THIRD)):
+        c, w = chip(lx, y + 4, label, color, size=12)
+        parts.append(c)
+        lx += w + 14
+    parts.append(
+        f'<path d="M{lx + 8:.1f} {y + 18:.1f} H{lx + 88:.1f}" stroke="{THIRD}" stroke-width="2"/>'
+        + ends(lx + 8, y + 18, lx + 88, y + 18, THIRD)
+    )
+    parts.append(txt(lx + 102, y + 23, "one dimension row → many fact rows", 13, MUTED))
+    height = int(y + 60)
+    svg = canvas(width, height, "\n".join(parts), "DATA MODEL", m["title"], m["subtitle"])
+    return svg, width, height
+
+
+# ------------------------------------------------------------------ 4. data model (bus matrix of several facts)
+def bus_matrix():
+    m = globals()["DATA_MODEL"]
+    width = 1920
+    nd = len(m["dims"])
+    fact_w, meas_w, gap = 390, 330, 8
+    cell_w = (width - 120 - fact_w - meas_w - gap * (nd + 1)) / nd
+    xs = [60 + fact_w + gap + i * (cell_w + gap) for i in range(nd)]
+    mx = xs[-1] + cell_w + gap
+    parts, top = [], 196
+    # Column headers: one card per conformed dimension
+    head_h = max(paragraph(0, 0, " · ".join(d["notes"]), cell_w - 28, 12.5, MUTED, 1.4)[1] for d in m["dims"]) + 112
+    parts.append(
+        f'<rect x="60" y="{top}" width="{fact_w}" height="{head_h:.1f}" rx="16" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+    )
+    parts.append(txt(84, top + 40, "FACT TABLES", 12, DIM, 700, spacing=2))
+    block, _ = paragraph(84, top + 74, m["matrix_note"], fact_w - 48, 14.5, MUTED)
+    parts.append(block)
+    for i, d in enumerate(m["dims"]):
+        x = xs[i]
+        parts.append(
+            f'<rect x="{x:.1f}" y="{top}" width="{cell_w:.1f}" height="{head_h:.1f}" rx="16" fill="{CARD}" stroke="{THIRD}" stroke-opacity="0.45" stroke-width="1.5"/>'
+        )
+        parts.append(f'<rect x="{x + 14:.1f}" y="{top}" width="40" height="3" rx="1.5" fill="{THIRD}"/>')
+        parts.append(icon(d["icon"], x + 14, top + 18, 24, THIRD))
+        size = min(13.5, (cell_w - 28) / len(d["name"]) / 0.6)
+        parts.append(txt(x + 14, top + 66, d["name"], size, INK, 700, family=MONO))
+        parts.append(txt(x + 14, top + 88, d["key"], 11.5, SECOND, 600, family=MONO))
+        block, _ = paragraph(x + 14, top + 112, " · ".join(d["notes"]), cell_w - 28, 12.5, MUTED, 1.4)
+        parts.append(block)
+    parts.append(
+        f'<rect x="{mx:.1f}" y="{top}" width="{meas_w}" height="{head_h:.1f}" rx="16" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+    )
+    parts.append(txt(mx + 24, top + 40, "MAIN MEASURES", 12, DIM, 700, spacing=2))
+    block, _ = paragraph(mx + 24, top + 74, m["measures_note"], meas_w - 48, 14.5, MUTED)
+    parts.append(block)
+    # Rows: one per fact table
+    y = top + head_h + gap
+    for f in m["facts"]:
+        _, e1 = paragraph(0, 0, f["grain"], fact_w - 48, 14, MUTED, 1.4)
+        _, e2 = paragraph(0, 0, f["measures"], meas_w - 48, 13, INK, 1.5, family=MONO)
+        row_h = max(e1 + 92, e2 + 44, 128)
+        parts.append(
+            f'<rect x="60" y="{y:.1f}" width="{fact_w}" height="{row_h:.1f}" rx="16" fill="{CARD}" stroke="{SECOND}" stroke-opacity="0.55" stroke-width="1.5"/>'
+        )
+        parts.append(f'<rect x="60" y="{y + 16:.1f}" width="4" height="{row_h - 32:.1f}" rx="2" fill="{SECOND}"/>')
+        size = min(17, (fact_w - 48) / len(f["name"]) / 0.6)
+        parts.append(txt(84, y + 36, f["name"], size, INK, 800, family=MONO))
+        c, _ = chip(84, y + 50, f["type"], SECOND, size=12, pad=10)
+        parts.append(c)
+        block, _ = paragraph(84, y + 100, f["grain"], fact_w - 48, 14, MUTED, 1.4)
+        parts.append(block)
+        for i, cell in enumerate(f["cells"]):
+            x = xs[i]
+            used = cell is not None
+            parts.append(
+                f'<rect x="{x:.1f}" y="{y:.1f}" width="{cell_w:.1f}" height="{row_h:.1f}" rx="14" '
+                f'fill="{CARD_2 if used else CARD}" stroke="{LINE}"/>'
+            )
+            if not used:
+                parts.append(txt(x + cell_w / 2, y + row_h / 2 + 5, "—", 16, DIM, 500, "middle"))
+                continue
+            cx = x + cell_w / 2
+            parts.append(
+                f'<circle cx="{cx:.1f}" cy="{y + 36:.1f}" r="15" fill="{BG_1}" stroke="{GOOD}" stroke-width="2"/>'
+                f'<path d="M{cx - 6:.1f} {y + 36.5:.1f} l4 4 l8 -9" fill="none" stroke="{GOOD}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+            )
+            if cell:
+                lines = wrap(cell, cell_w - 20, 12.5)
+                for k, line in enumerate(lines):
+                    parts.append(txt(cx, y + 74 + k * 17, line, 12.5, MUTED, 500, "middle"))
+        parts.append(
+            f'<rect x="{mx:.1f}" y="{y:.1f}" width="{meas_w}" height="{row_h:.1f}" rx="16" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+        )
+        block, _ = paragraph(mx + 24, y + 36, f["measures"], meas_w - 48, 13, INK, 1.5, family=MONO)
+        parts.append(block)
+        y += row_h + gap
+    # Link between the two claim facts, and design notes
+    if m.get("link"):
+        y += 14
+        c, w = chip(60, y, m["link"][0], SECOND, size=13, family=MONO)
+        parts.append(c)
+        parts.append(txt(60 + w + 16, y + 18, m["link"][1], 15, MUTED))
+        y += 54
+    if m.get("notes"):
+        n = len(m["notes"])
+        nw = (width - 120 - 20 * (n - 1)) / n
+        nh = max(paragraph(0, y + 74, t, nw - 56, 14.5, MUTED)[1] for _, t in m["notes"]) - y + 10
+        for k, (head, text) in enumerate(m["notes"]):
+            nx = 60 + k * (nw + 20)
+            parts.append(
+                f'<rect x="{nx:.1f}" y="{y:.1f}" width="{nw:.1f}" height="{nh:.1f}" rx="18" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+            )
+            parts.append(f'<rect x="{nx + 24:.1f}" y="{y:.1f}" width="44" height="3" rx="1.5" fill="url(#accent)"/>')
+            block, _ = paragraph(nx + 28, y + 42, head, nw - 56, 17, INK, 1.2, weight=700)
+            parts.append(block)
+            block, _ = paragraph(nx + 28, y + 74, text, nw - 56, 14.5, MUTED)
+            parts.append(block)
+        y += nh + 24
+    parts.append(txt(60, y + 22, "LEGEND", 12, DIM, 700, spacing=2))
+    parts.append(
+        f'<circle cx="171" cy="{y + 17}" r="11" fill="{BG_1}" stroke="{GOOD}" stroke-width="2"/>'
+        f'<path d="M166.5 {y + 17.5} l3 3 l6 -7" fill="none" stroke="{GOOD}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    )
+    parts.append(txt(192, y + 22, "the fact table uses this dimension; the text says which version or role", 13, MUTED))
+    height = int(y + 60)
+    svg = canvas(width, height, "\n".join(parts), "DATA MODEL", m["title"], m["subtitle"])
+    return svg, width, height
+
+
+# ------------------------------------------------------------------ 5. pipeline flow (tasks, groups, branches)
+def flow_node(n, x, y, w, h=None):
+    """Draws one task of the pipeline; returns the parts and the height its content needs."""
+    color = {"task": ACCENT_LIGHT, "gate": WARN, "stop": BAD, "end": GOOD}[n.get("kind", "task")]
+    parts = []
+    inner = w - 36
+    size = min(15, inner / max(len(n["title"]), 1) / 0.6)
+    cy = y + 106
+    block, cy = paragraph(x + 18, cy, n["what"], inner, 13.5, MUTED, 1.45)
+    parts.append(block)
+    cy += 4
+    if n.get("out"):
+        # Long names that cannot wrap (paths, file names) get a smaller font so they stay inside the card
+        out_size = min(12, (inner - 4) / max(len(word) for word in n["out"].split()) / 0.6)
+        _, e = paragraph(0, 0, n["out"], inner - 4, out_size, SECOND, 1.4, family=MONO)
+        box_h = e + 30
+        parts.append(
+            f'<rect x="{x + 12:.1f}" y="{cy:.1f}" width="{w - 24:.1f}" height="{box_h:.1f}" rx="10" fill="{CARD_2}"/>'
+        )
+        parts.append(txt(x + 22, cy + 18, n.get("out_label", "WRITES"), 10.5, DIM, 700, spacing=2))
+        block, _ = paragraph(x + 22, cy + 36, n["out"], inner - 4, out_size, SECOND, 1.4, family=MONO)
+        parts.append(block)
+        cy += box_h + 10
+    if n.get("rule"):
+        rule_color = {"good": GOOD, "warn": WARN, "bad": BAD}[n.get("rule_kind", "warn")]
+        c, _ = chip(x + 12, cy, n["rule"], rule_color, size=11.5, pad=10)
+        parts.append(c)
+        cy += 36
+    need = cy - y + 8
+    h = h or need
+    head = [
+        f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" rx="18" fill="{CARD}" stroke="{color}" '
+        f'stroke-opacity="{0.35 if n.get("kind", "task") == "task" else 0.8}" stroke-width="1.5"/>',
+        f'<rect x="{x + 18:.1f}" y="{y:.1f}" width="48" height="3" rx="1.5" fill="{color}"/>',
+        f'<circle cx="{x + 36:.1f}" cy="{y + 38:.1f}" r="19" fill="{CARD_2}" stroke="{color}" stroke-opacity="0.7" stroke-width="1.5"/>',
+        icon(n["icon"], x + 24, y + 26, 24, color),
+    ]
+    if n.get("step"):
+        head.append(txt(x + w - 16, y + 44, n["step"], 22, LINE, 800, "end"))
+    head.append(txt(x + 18, y + 82, n["title"], size, INK, 700, family=MONO))
+    return head + parts, need
+
+
+def pipeline():
+    pl = globals()["PIPELINE"]
+    width = 1920
+    cols = pl["cols"]
+    gap = pl.get("gap", 56)
+    w = (width - 120 - gap * (cols - 1)) / cols
+    parts = []
+    top = 172
+    if pl.get("rules"):  # schedule and reliability rules of the run
+        title, chips = pl["rules"]
+        x, y = 88, top + 52
+        rows = []
+        for label, kind in chips:
+            color = {"good": GOOD, "warn": WARN, "bad": BAD, "info": ACCENT_LIGHT, "second": SECOND}[kind]
+            _, cw = chip(0, 0, label, color, size=13.5)
+            if x + cw > width - 88:
+                x, y = 88, y + 42
+            rows.append(chip(x, y, label, color, size=13.5)[0])
+            x += cw + 10
+        band_h = y - top + 52
+        parts.append(
+            f'<rect x="60" y="{top}" width="{width - 120}" height="{band_h}" rx="20" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+        )
+        parts.append(icon(pl.get("rules_icon", "clock"), 86, top + 16, 24, ACCENT_LIGHT))
+        parts.append(txt(122, top + 35, title, 14, ACCENT_LIGHT, 700, spacing=3))
+        parts += rows
+        top += band_h + 34
+    has_groups = bool(pl.get("groups"))
+    group_pad = 16
+    nodes_top = top + (52 if has_groups else 0)
+    n_rows = max(n["row"] for n in pl["nodes"]) + 1
+    node_h = max(flow_node(n, 0, 0, w)[1] for n in pl["nodes"])
+    row_gap = 48
+    pos = {}
+    for n in pl["nodes"]:
+        x = 60 + n["col"] * (w + gap)
+        y = nodes_top + n["row"] * (node_h + row_gap)
+        pos[n["id"]] = (x, y)
+    bottom = nodes_top + n_rows * node_h + (n_rows - 1) * row_gap
+    for label, a, b in pl.get("groups", []):
+        xa = 60 + a * (w + gap) - group_pad
+        xb = 60 + b * (w + gap) + w + group_pad
+        last = max(n["row"] for n in pl["nodes"] if a <= n["col"] <= b)  # the box covers only the rows it uses
+        g_bottom = nodes_top + (last + 1) * node_h + last * row_gap
+        parts.append(
+            f'<rect x="{xa:.1f}" y="{top:.1f}" width="{xb - xa:.1f}" height="{g_bottom - top + group_pad:.1f}" rx="24" '
+            f'fill="{ACCENT}" fill-opacity="0.035" stroke="{ACCENT}" stroke-opacity="0.35" stroke-width="1.3" stroke-dasharray="6 6"/>'
+        )
+        parts.append(txt(xa + 22, top + 32, label, 13, ACCENT_LIGHT, 700, spacing=3))
+    # Edges first, so the cards sit on top of them
+    mid = node_h / 2
+    for edge in pl["edges"]:
+        a, b, label, kind = (list(edge) + ["", "normal"])[:4]
+        (xa, ya), (xb, yb) = pos[a], pos[b]
+        color = {"normal": ACCENT_LIGHT, "good": GOOD, "bad": BAD}[kind]
+        x1, y1, x2, y2 = xa + w, ya + mid, xb, yb + mid
+        if pos[a][1] != pos[b][1]:
+            y1 = ya + mid + (24 if yb > ya else -24)
+        xm = x1 + (x2 - x1) / 2
+        path = link(x1, y1, x2 - 10, y2, xm, color).replace(
+            'stroke-width="2"/>', f'stroke-width="2.4" marker-end="url(#arrow-{kind})"/>'
+        )
+        parts.append(path)
+        if label:
+            c, cw = chip(0, 0, label, color, size=12, pad=9)
+            parts.append(
+                chip(
+                    xm - cw / 2,
+                    (y1 + y2) / 2 - 13 if abs(y1 - y2) > 2 else y1 - 34,
+                    label,
+                    color,
+                    size=12,
+                    pad=9,
+                    fill=BG_1,
+                )[0]
+            )
+    for n in pl["nodes"]:
+        x, y = pos[n["id"]]
+        body, _ = flow_node(n, x, y, w, node_h)
+        parts.append(f'<g id="{esc(n["id"])}">' + "".join(body) + "</g>")
+    y = bottom + 40
+    notes = pl.get("notes", [])
+    # Notes go in the empty space left of the last row when it is wide enough, otherwise below the flow
+    free = min(n["col"] for n in pl["nodes"] if n["row"] == n_rows - 1) if n_rows > 1 else 0
+    if notes and free >= 2:
+        area = free * (w + gap) - gap
+        k = len(notes)
+        nw = (area - 20 * (k - 1)) / k
+        ny = nodes_top + (n_rows - 1) * (node_h + row_gap)
+        need = max(paragraph(0, 74, t, nw - 56, 14.5, MUTED)[1] for _, t in notes) + 20
+        if need <= node_h:
+            for i, (head, text) in enumerate(notes):
+                nx = 60 + i * (nw + 20)
+                parts.append(
+                    f'<rect x="{nx:.1f}" y="{ny:.1f}" width="{nw:.1f}" height="{need:.1f}" rx="18" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+                )
+                parts.append(
+                    f'<rect x="{nx + 24:.1f}" y="{ny:.1f}" width="44" height="3" rx="1.5" fill="url(#accent)"/>'
+                )
+                block, _ = paragraph(nx + 28, ny + 42, head, nw - 56, 17, INK, 1.2, weight=700)
+                parts.append(block)
+                block, _ = paragraph(nx + 28, ny + 74, text, nw - 56, 14.5, MUTED)
+                parts.append(block)
+            notes = []
+    if notes:
+        k = len(notes)
+        nw = (width - 120 - 20 * (k - 1)) / k
+        nh = max(paragraph(0, y + 74, t, nw - 56, 14.5, MUTED)[1] for _, t in notes) - y + 10
+        for i, (head, text) in enumerate(notes):
+            nx = 60 + i * (nw + 20)
+            parts.append(
+                f'<rect x="{nx:.1f}" y="{y:.1f}" width="{nw:.1f}" height="{nh:.1f}" rx="18" fill="{CARD}" stroke="{LINE}" stroke-width="1.5"/>'
+            )
+            parts.append(f'<rect x="{nx + 24:.1f}" y="{y:.1f}" width="44" height="3" rx="1.5" fill="url(#accent)"/>')
+            block, _ = paragraph(nx + 28, y + 42, head, nw - 56, 17, INK, 1.2, weight=700)
+            parts.append(block)
+            block, _ = paragraph(nx + 28, y + 74, text, nw - 56, 14.5, MUTED)
+            parts.append(block)
+        y += nh + 24
+    height = int(y + 16)
+    svg = canvas(width, height, "\n".join(parts), pl.get("eyebrow", "PIPELINE"), pl["title"], pl["subtitle"])
     return svg, width, height
 
 
@@ -476,14 +1092,24 @@ def render(svgs):
         for name, (svg, w, h) in svgs.items():
             page = browser.new_page(viewport={"width": w, "height": h}, device_scale_factor=1)
             page.set_content(f"<html><body style='margin:0;background:transparent'>{svg}</body></html>")
-            page.screenshot(path=str(OUT / f"{name}.png"), clip={"x": 0, "y": 0, "width": w, "height": h}, omit_background=True)
+            page.screenshot(
+                path=str(OUT / f"{name}.png"), clip={"x": 0, "y": 0, "width": w, "height": h}, omit_background=True
+            )
             page.close()
         browser.close()
 
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    svgs = {"architecture": architecture(), "delivery_steps": delivery()}
+    # Each image is drawn only when the specification above describes it
+    spec = globals()
+    svgs = {}
+    if spec.get("LAYERS"):
+        svgs = {"architecture": architecture(), "delivery_steps": delivery()}
+    if spec.get("DATA_MODEL"):
+        svgs["data_model"] = bus_matrix() if spec["DATA_MODEL"].get("kind") == "bus" else star()
+    if spec.get("PIPELINE"):
+        svgs[spec["PIPELINE"].get("file", "pipeline_flow")] = pipeline()
     for name, (svg, _, _) in svgs.items():
         (OUT / f"{name}.svg").write_text(svg, encoding="utf-8")
     render(svgs)
