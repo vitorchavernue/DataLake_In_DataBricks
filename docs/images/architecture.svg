@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1245" viewBox="0 0 1920 1245">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0D0C0E"/><stop offset="1" stop-color="#17151A"/></linearGradient>
+  <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#FDBA74"/><stop offset="1" stop-color="#C2410C"/></linearGradient>
+  <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1800 0) scale(900)">
+    <stop stop-color="#F97316" stop-opacity="0.16"/><stop offset="1" stop-color="#F97316" stop-opacity="0"/></radialGradient>
+  <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="#fff" fill-opacity="0.04"/></pattern>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="#FDBA74"/></marker>
+</defs>
+<rect width="1920" height="1245" rx="28" fill="url(#bg)"/>
+<rect width="1920" height="1245" rx="28" fill="url(#glow)"/>
+<rect width="1920" height="1245" rx="28" fill="url(#dots)"/>
+<g id="Header">
+<circle cx="88" cy="78" r="30" fill="none" stroke="url(#accent)" stroke-width="2.5"/><g transform="translate(70.0 60.0) scale(1.5000)" fill="none" stroke="#FDBA74" stroke-width="2.00" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2.5 5 13.5h6l-1 8 8-11h-6z"/></g>
+<text x="136.0" y="70.0" font-family="Inter, Segoe UI, sans-serif" font-size="17" font-weight="600" fill="#FDBA74" text-anchor="start" letter-spacing="4">ARCHITECTURE</text>
+<text x="136.0" y="108.0" font-family="Inter, Segoe UI, sans-serif" font-size="38" font-weight="800" fill="#F4F1F5" text-anchor="start">Data Lakehouse on Databricks</text>
+<text x="1860.0" y="70.0" font-family="Inter, Segoe UI, sans-serif" font-size="17" font-weight="500" fill="#B0A9B5" text-anchor="end">Databricks · PySpark · Spark SQL · Delta Lake · Unity Catalog</text>
+<text x="1860.0" y="100.0" font-family="Inter, Segoe UI, sans-serif" font-size="17" font-weight="400" fill="#7E7684" text-anchor="end">CRM + ERP files → volume → bronze → silver → gold star schema → Power BI</text>
+<rect x="60" y="138" width="1800" height="1.5" fill="#37333C"/><rect x="60" y="137.5" width="120" height="2.5" fill="url(#accent)"/>
+</g>
+<rect x="60" y="172" width="1800" height="92" rx="20" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<circle cx="112" cy="218" r="26" fill="#232027" stroke="#C2410C" stroke-width="1.5"/>
+<g transform="translate(96.0 202.0) scale(1.3333)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="6" r="2.5"/><circle cx="18.5" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 6h8M7 8l3.6 7.8M17 8l-3.6 7.8"/></g>
+<text x="154.0" y="212.0" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#FDBA74" text-anchor="start" letter-spacing="3">ORCHESTRATION</text>
+<text x="154.0" y="238.0" font-family="Inter, Segoe UI, sans-serif" font-size="20" font-weight="700" fill="#F4F1F5" text-anchor="start">Databricks notebooks · one entry point per layer</text>
+<rect x="722.0" y="202.0" width="141.6" height="29" rx="14.5" fill="#232027" stroke="#FDBA74" stroke-opacity="0.6" stroke-width="1.2"/><text x="734.0" y="220.5" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#FDBA74" text-anchor="start">init_lakehouse</text>
+<path d="M869.6 216.5 h14" stroke="#FDBA74" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="891.6" y="202.0" width="208.8" height="29" rx="14.5" fill="#232027" stroke="#FDBA74" stroke-opacity="0.6" stroke-width="1.2"/><text x="903.6" y="220.5" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#FDBA74" text-anchor="start">bronze (config-driven)</text>
+<path d="M1106.4 216.5 h14" stroke="#FDBA74" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1128.4" y="202.0" width="192.0" height="29" rx="14.5" fill="#232027" stroke="#FDBA74" stroke-opacity="0.6" stroke-width="1.2"/><text x="1140.4" y="220.5" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#FDBA74" text-anchor="start">silver_orchestration</text>
+<path d="M1326.4 216.5 h14" stroke="#FDBA74" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1348.4" y="202.0" width="175.2" height="29" rx="14.5" fill="#232027" stroke="#FDBA74" stroke-opacity="0.6" stroke-width="1.2"/><text x="1360.4" y="220.5" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="600" fill="#FDBA74" text-anchor="start">gold_orchestration</text>
+<rect x="1551.6" y="202.0" width="220.0" height="28" rx="14.0" fill="#232027" stroke="#34D399" stroke-opacity="0.6" stroke-width="1.2"/><text x="1563.6" y="219.5" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="600" fill="#34D399" text-anchor="start">ready for Databricks Jobs</text>
+<g id="Layer 1 Sources">
+<rect x="60.0" y="300" width="318.4" height="555.8" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<rect x="86.0" y="300" width="70" height="3.5" rx="1.75" fill="url(#accent)"/>
+<circle cx="112.0" cy="356" r="28" fill="#232027" stroke="#C2410C" stroke-width="1.5"/>
+<g transform="translate(95.0 339.0) scale(1.4167)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12h6M9.5 15.5h6"/></g>
+<text x="352.4" y="348.0" font-family="Inter, Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#37333C" text-anchor="end">01</text>
+<text x="86.0" y="418.0" font-family="Inter, Segoe UI, sans-serif" font-size="24" font-weight="800" fill="#F4F1F5" text-anchor="start">Sources</text>
+<text x="86.0" y="449.6" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#FDBA74" text-anchor="start">bronze.raw_sources volume</text>
+<text x="86.0" y="470.5" font-family="Inter, Segoe UI, sans-serif" font-size="14.5" font-weight="400" fill="#B0A9B5" text-anchor="start">CRM and ERP CSV files</text>
+<rect x="86.0" y="486.1" width="266.4" height="1" fill="#37333C"/>
+<rect x="86.0" y="500.1" width="129.2" height="28" rx="8" fill="#232027" stroke="#37333C"/>
+<text x="96.0" y="519.1" font-family="JetBrains Mono, Consolas, monospace" font-size="12" font-weight="500" fill="#F4F1F5" text-anchor="start">cust_info</text>
+<rect x="223.2" y="500.1" width="129.2" height="28" rx="8" fill="#232027" stroke="#37333C"/>
+<text x="233.2" y="519.1" font-family="JetBrains Mono, Consolas, monospace" font-size="12" font-weight="500" fill="#F4F1F5" text-anchor="start">prd_info</text>
+<rect x="86.0" y="536.1" width="129.2" height="28" rx="8" fill="#232027" stroke="#37333C"/>
+<text x="96.0" y="555.1" font-family="JetBrains Mono, Consolas, monospace" font-size="12" font-weight="500" fill="#F4F1F5" text-anchor="start">sales_details</text>
+<rect x="223.2" y="536.1" width="129.2" height="28" rx="8" fill="#232027" stroke="#37333C"/>
+<text x="233.2" y="555.1" font-family="JetBrains Mono, Consolas, monospace" font-size="12" font-weight="500" fill="#F4F1F5" text-anchor="start">CUST_AZ12</text>
+<rect x="86.0" y="572.1" width="129.2" height="28" rx="8" fill="#232027" stroke="#37333C"/>
+<text x="96.0" y="591.1" font-family="JetBrains Mono, Consolas, monospace" font-size="12" font-weight="500" fill="#F4F1F5" text-anchor="start">LOC_A101</text>
+<rect x="223.2" y="572.1" width="129.2" height="28" rx="8" fill="#232027" stroke="#37333C"/>
+<text x="233.2" y="591.1" font-family="JetBrains Mono, Consolas, monospace" font-size="12" font-weight="500" fill="#F4F1F5" text-anchor="start">PX_CAT_G1V2</text>
+<circle cx="91.0" cy="637.1" r="3.5" fill="#F97316"/>
+<text x="104.0" y="642.1" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Different keys for the same</text><text x="104.0" y="663.4" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">customer</text>
+<circle cx="91.0" cy="691.7" r="3.5" fill="#F97316"/>
+<text x="104.0" y="696.7" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Invalid dates, negative</text><text x="104.0" y="718.0" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">prices, coded attributes</text>
+<rect x="78.0" y="777.8" width="282.4" height="60" rx="12" fill="#232027"/>
+<text x="92.0" y="804.8" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">Two systems that do not speak the</text><text x="92.0" y="822.7" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">same language</text>
+</g>
+<path d="M384.4 577.9 h38" stroke="#FDBA74" stroke-width="2.5" marker-end="url(#arrow)"/>
+<g id="Layer 2 Bronze">
+<rect x="430.4" y="300" width="318.4" height="555.8" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<rect x="456.4" y="300" width="70" height="3.5" rx="1.75" fill="url(#accent)"/>
+<circle cx="482.4" cy="356" r="28" fill="#232027" stroke="#C2410C" stroke-width="1.5"/>
+<g transform="translate(465.4 339.0) scale(1.4167)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 8l-9 4.5L3 8z"/><path d="M3 12.5l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/></g>
+<text x="722.8" y="348.0" font-family="Inter, Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#37333C" text-anchor="end">02</text>
+<text x="456.4" y="418.0" font-family="Inter, Segoe UI, sans-serif" font-size="24" font-weight="800" fill="#F4F1F5" text-anchor="start">Bronze</text>
+<text x="456.4" y="449.6" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#FDBA74" text-anchor="start">bronze.* · Delta</text>
+<text x="456.4" y="470.5" font-family="Inter, Segoe UI, sans-serif" font-size="14.5" font-weight="400" fill="#B0A9B5" text-anchor="start">config-driven ingestion</text>
+<rect x="456.4" y="486.1" width="266.4" height="1" fill="#37333C"/>
+<circle cx="461.4" cy="515.1" r="3.5" fill="#F97316"/>
+<text x="474.4" y="520.1" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">One list maps each file to its</text><text x="474.4" y="541.4" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">table (INGESTION_CONFIG)</text>
+<circle cx="461.4" cy="569.7" r="3.5" fill="#F97316"/>
+<text x="474.4" y="574.7" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">A new source needs no new code</text>
+<circle cx="461.4" cy="603.0" r="3.5" fill="#F97316"/>
+<text x="474.4" y="608.0" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Data kept as-is: full history</text><text x="474.4" y="629.3" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">and lineage</text>
+<rect x="448.4" y="777.8" width="282.4" height="60" rx="12" fill="#232027"/>
+<text x="462.4" y="804.8" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">6 raw Delta tables</text>
+</g>
+<path d="M754.8 577.9 h38" stroke="#FDBA74" stroke-width="2.5" marker-end="url(#arrow)"/>
+<g id="Layer 3 Silver">
+<rect x="800.8" y="300" width="318.4" height="555.8" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<rect x="826.8" y="300" width="70" height="3.5" rx="1.75" fill="url(#accent)"/>
+<circle cx="852.8" cy="356" r="28" fill="#232027" stroke="#C2410C" stroke-width="1.5"/>
+<g transform="translate(835.8 339.0) scale(1.4167)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></g>
+<text x="1093.2" y="348.0" font-family="Inter, Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#37333C" text-anchor="end">03</text>
+<text x="826.8" y="418.0" font-family="Inter, Segoe UI, sans-serif" font-size="24" font-weight="800" fill="#F4F1F5" text-anchor="start">Silver</text>
+<text x="826.8" y="449.6" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#FDBA74" text-anchor="start">silver.* · Delta</text>
+<text x="826.8" y="470.5" font-family="Inter, Segoe UI, sans-serif" font-size="14.5" font-weight="400" fill="#B0A9B5" text-anchor="start">one notebook per table</text>
+<rect x="826.8" y="486.1" width="266.4" height="1" fill="#37333C"/>
+<circle cx="831.8" cy="515.1" r="3.5" fill="#F97316"/>
+<text x="844.8" y="520.1" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Read → transform → validate →</text><text x="844.8" y="541.4" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">write</text>
+<circle cx="831.8" cy="569.7" r="3.5" fill="#F97316"/>
+<text x="844.8" y="574.7" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Codes to readable values (S/M</text><text x="844.8" y="596.0" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">→ Single/Married)</text>
+<circle cx="831.8" cy="624.3" r="3.5" fill="#F97316"/>
+<text x="844.8" y="629.3" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Invalid dates → NULL; prices</text><text x="844.8" y="650.6" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">recalculated from sales /</text><text x="844.8" y="671.9" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">quantity</text>
+<circle cx="831.8" cy="700.2" r="3.5" fill="#F97316"/>
+<text x="844.8" y="705.2" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Product key split; NAS prefix</text><text x="844.8" y="726.5" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">removed from ERP ids</text>
+<rect x="818.8" y="777.8" width="282.4" height="60" rx="12" fill="#232027"/>
+<text x="832.8" y="804.8" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">Quality rules as versioned code</text>
+</g>
+<path d="M1125.2 577.9 h38" stroke="#FDBA74" stroke-width="2.5" marker-end="url(#arrow)"/>
+<g id="Layer 4 Gold">
+<rect x="1171.2" y="300" width="318.4" height="555.8" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<rect x="1197.2" y="300" width="70" height="3.5" rx="1.75" fill="url(#accent)"/>
+<circle cx="1223.2" cy="356" r="28" fill="#232027" stroke="#C2410C" stroke-width="1.5"/>
+<g transform="translate(1206.2 339.0) scale(1.4167)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></g>
+<text x="1463.6" y="348.0" font-family="Inter, Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#37333C" text-anchor="end">04</text>
+<text x="1197.2" y="418.0" font-family="Inter, Segoe UI, sans-serif" font-size="24" font-weight="800" fill="#F4F1F5" text-anchor="start">Gold</text>
+<text x="1197.2" y="449.6" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#FDBA74" text-anchor="start">gold.* · Spark SQL</text>
+<text x="1197.2" y="470.5" font-family="Inter, Segoe UI, sans-serif" font-size="14.5" font-weight="400" fill="#B0A9B5" text-anchor="start">star schema with surrogate keys</text>
+<rect x="1197.2" y="486.1" width="266.4" height="1" fill="#37333C"/>
+<text x="1197.2" y="520.1" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#7E7684" text-anchor="start" letter-spacing="2">DIMENSIONS</text>
+<rect x="1197.2" y="534.1" width="121.4" height="28" rx="14" fill="#232027" stroke="#FDE68A" stroke-opacity="0.55"/>
+<text x="1207.2" y="553.1" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#FDE68A" text-anchor="start">dim_customers</text>
+<rect x="1326.6" y="534.1" width="113.6" height="28" rx="14" fill="#232027" stroke="#FDE68A" stroke-opacity="0.55"/>
+<text x="1336.6" y="553.1" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#FDE68A" text-anchor="start">dim_products</text>
+<text x="1197.2" y="596.1" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#7E7684" text-anchor="start" letter-spacing="2">FACT</text>
+<rect x="1197.2" y="610.1" width="266.4" height="46" rx="10" fill="#232027" stroke="#5EEAD4" stroke-opacity="0.5"/>
+<text x="1211.2" y="630.1" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="600" fill="#F4F1F5" text-anchor="start">fact_sales</text>
+<text x="1211.2" y="648.1" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="500" fill="#5EEAD4" text-anchor="start">orders linked by surrogate keys</text>
+<circle cx="1202.2" cy="681.1" r="3.5" fill="#F97316"/>
+<text x="1215.2" y="686.1" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">CRM as master source, ERP as</text><text x="1215.2" y="707.4" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">fallback</text>
+<rect x="1189.2" y="777.8" width="282.4" height="60" rx="12" fill="#232027"/>
+<text x="1203.2" y="804.8" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">One integrated sales model</text>
+</g>
+<path d="M1495.6 577.9 h38" stroke="#FDBA74" stroke-width="2.5" marker-end="url(#arrow)"/>
+<g id="Layer 5 Consumption">
+<rect x="1541.6" y="300" width="318.4" height="555.8" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<rect x="1567.6" y="300" width="70" height="3.5" rx="1.75" fill="url(#accent)"/>
+<circle cx="1593.6" cy="356" r="28" fill="#232027" stroke="#C2410C" stroke-width="1.5"/>
+<g transform="translate(1576.6 339.0) scale(1.4167)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></g>
+<text x="1834.0" y="348.0" font-family="Inter, Segoe UI, sans-serif" font-size="30" font-weight="800" fill="#37333C" text-anchor="end">05</text>
+<text x="1567.6" y="418.0" font-family="Inter, Segoe UI, sans-serif" font-size="24" font-weight="800" fill="#F4F1F5" text-anchor="start">Consumption</text>
+<text x="1567.6" y="449.6" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#FDBA74" text-anchor="start">gold schema</text>
+<text x="1567.6" y="470.5" font-family="Inter, Segoe UI, sans-serif" font-size="14.5" font-weight="400" fill="#B0A9B5" text-anchor="start">Power BI · Databricks SQL</text>
+<rect x="1567.6" y="486.1" width="266.4" height="1" fill="#37333C"/>
+<circle cx="1572.6" cy="515.1" r="3.5" fill="#F97316"/>
+<text x="1585.6" y="520.1" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Power BI connects directly to</text><text x="1585.6" y="541.4" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">gold</text>
+<circle cx="1572.6" cy="569.7" r="3.5" fill="#F97316"/>
+<text x="1585.6" y="574.7" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">Who are the customers, which</text><text x="1585.6" y="596.0" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">products sell, sales by</text><text x="1585.6" y="617.3" font-family="Inter, Segoe UI, sans-serif" font-size="15" font-weight="400" fill="#F4F1F5" text-anchor="start">country</text>
+<rect x="1559.6" y="777.8" width="282.4" height="60" rx="12" fill="#232027"/>
+<text x="1573.6" y="804.8" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">No manual preparation in</text><text x="1573.6" y="822.7" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="400" fill="#B0A9B5" text-anchor="start">spreadsheets</text>
+</g>
+<rect x="60" y="895.8" width="888.0" height="310" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<g transform="translate(88.0 921.8) scale(1.2500)" fill="none" stroke="#FDBA74" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></g>
+<text x="130.0" y="945.8" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="800" fill="#F4F1F5" text-anchor="start">Where the code is</text>
+<rect x="88" y="975.8" width="832.0" height="62" rx="10" fill="#232027"/>
+<rect x="88" y="975.8" width="5" height="62" rx="2.5" fill="#FDBA74"/>
+<text x="108.0" y="1001.8" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#F4F1F5" text-anchor="start">script/bronze · script/silver · script/gold</text>
+<text x="908.0" y="1001.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#FDBA74" text-anchor="end">PySpark · Spark SQL</text>
+<text x="108.0" y="1024.8" font-family="Inter, Segoe UI, sans-serif" font-size="13.5" font-weight="400" fill="#B0A9B5" text-anchor="start">Ingestion, cleaning rules and the star schema, one notebook per table</text>
+<rect x="88" y="1045.8" width="832.0" height="62" rx="10" fill="#232027"/>
+<rect x="88" y="1045.8" width="5" height="62" rx="2.5" fill="#FDE68A"/>
+<text x="108.0" y="1071.8" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#F4F1F5" text-anchor="start">script/init_lakehouse.ipynb</text>
+<text x="908.0" y="1071.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#FDE68A" text-anchor="end">Unity Catalog</text>
+<text x="108.0" y="1094.8" font-family="Inter, Segoe UI, sans-serif" font-size="13.5" font-weight="400" fill="#B0A9B5" text-anchor="start">Schemas bronze, silver, gold and the raw sources volume</text>
+<rect x="88" y="1115.8" width="832.0" height="62" rx="10" fill="#232027"/>
+<rect x="88" y="1115.8" width="5" height="62" rx="2.5" fill="#5EEAD4"/>
+<text x="108.0" y="1141.8" font-family="JetBrains Mono, Consolas, monospace" font-size="14" font-weight="600" fill="#F4F1F5" text-anchor="start">datasets/engineering</text>
+<text x="908.0" y="1141.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#5EEAD4" text-anchor="end">CSV</text>
+<text x="108.0" y="1164.8" font-family="Inter, Segoe UI, sans-serif" font-size="13.5" font-weight="400" fill="#B0A9B5" text-anchor="start">CRM and ERP source files used as pipeline input</text>
+<rect x="972.0" y="895.8" width="888.0" height="310" rx="22" fill="#1B191E" stroke="#37333C" stroke-width="1.5"/>
+<g transform="translate(1000.0 921.8) scale(1.2500)" fill="none" stroke="#5EEAD4" stroke-width="1.90" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.5"/></g>
+<text x="1042.0" y="945.8" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="800" fill="#F4F1F5" text-anchor="start">What the project delivers</text>
+<rect x="1000.0" y="977.8" width="199.0" height="202" rx="14" fill="#232027"/>
+<rect x="1018.0" y="977.8" width="44" height="3" rx="1.5" fill="#5EEAD4"/>
+<text x="1018.0" y="1041.8" font-family="Inter, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#5EEAD4" text-anchor="start">2 → 1</text>
+<text x="1018.0" y="1079.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">CRM and ERP</text><text x="1018.0" y="1099.7" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">integrated into one</text><text x="1018.0" y="1119.5" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">model</text>
+<rect x="1211.0" y="977.8" width="199.0" height="202" rx="14" fill="#232027"/>
+<rect x="1229.0" y="977.8" width="44" height="3" rx="1.5" fill="#5EEAD4"/>
+<text x="1229.0" y="1041.8" font-family="Inter, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#5EEAD4" text-anchor="start">6</text>
+<text x="1229.0" y="1079.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">bronze tables loaded</text><text x="1229.0" y="1099.7" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">from one config list</text>
+<rect x="1422.0" y="977.8" width="199.0" height="202" rx="14" fill="#232027"/>
+<rect x="1440.0" y="977.8" width="44" height="3" rx="1.5" fill="#5EEAD4"/>
+<text x="1440.0" y="1041.8" font-family="Inter, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#5EEAD4" text-anchor="start">8</text>
+<text x="1440.0" y="1079.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">data quality rules</text><text x="1440.0" y="1099.7" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">applied in silver</text>
+<rect x="1633.0" y="977.8" width="199.0" height="202" rx="14" fill="#232027"/>
+<rect x="1651.0" y="977.8" width="44" height="3" rx="1.5" fill="#5EEAD4"/>
+<text x="1651.0" y="1041.8" font-family="Inter, Segoe UI, sans-serif" font-size="40" font-weight="800" fill="#5EEAD4" text-anchor="start">3</text>
+<text x="1651.0" y="1079.8" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">gold tables ready for</text><text x="1651.0" y="1099.7" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="400" fill="#B0A9B5" text-anchor="start">BI</text>
+</svg>
